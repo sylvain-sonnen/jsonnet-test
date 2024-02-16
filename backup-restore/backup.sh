@@ -17,7 +17,7 @@ for cmd in curl jq; do
 done
 echo "Done!"
 
-GRAFANA_AUTH="glsa_eQkZuvOY7ccsPJUmWMp1ZQtoHunAOiHw_faf45ebe"
+GRAFANA_AUTH="<changeme:gitlab-service-account-token>"
 GRAFANA_URL="http://localhost:8080"
 
 echo "Creating backup folder structure..."
@@ -43,7 +43,6 @@ echo "Done!"
 echo "Retrieving the list of datasources from Grafana..."
 datasources=$(curl -s -H "Authorization: Bearer $GRAFANA_AUTH" "${GRAFANA_URL}/api/datasources")
 
-# Parse and save each datasource to a separate JSON file
 echo "$datasources" | jq -c '.[]' | while read -r datasource; do
 	name=$(echo "$datasource" | jq -r '.name')
 	echo "$datasource" | jq '.' >"backup/datasources/datasource_${name// /_}.json"
