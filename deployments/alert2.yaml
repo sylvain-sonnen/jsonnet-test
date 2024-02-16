@@ -1,0 +1,96 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: test
+  labels:
+    grafana_alert: "1"
+data:
+  rules.yaml: | 
+    apiVersion: 1
+    groups:
+        - orgId: 1
+          name: test
+          folder: test
+          interval: 5m
+          rules:
+            - uid: a0a59efa-3921-47c7-b27e-688657b93262
+              title: mynewtest
+              condition: C
+              data:
+                - refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: prometheus
+                  model:
+                    editorMode: code
+                    expr: 100 * avg(node_memory_Active_bytes) by (instance) / avg(node_memory_MemTotal_bytes) by (instance)
+                    instant: true
+                    intervalMs: 1000
+                    legendFormat: '{{instance}}'
+                    maxDataPoints: 43200
+                    range: false
+                    refId: A
+                - refId: B
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                        - evaluator:
+                            params: []
+                            type: gt
+                          operator:
+                            type: and
+                          query:
+                            params:
+                                - B
+                          reducer:
+                            params: []
+                            type: last
+                          type: query
+                    datasource:
+                        type: __expr__
+                        uid: __expr__
+                    expression: A
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    reducer: last
+                    refId: B
+                    type: reduce
+                - refId: C
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+                  datasourceUid: __expr__
+                  model:
+                    conditions:
+                        - evaluator:
+                            params:
+                                - 10
+                            type: gt
+                          operator:
+                            type: and
+                          query:
+                            params:
+                                - C
+                          reducer:
+                            params: []
+                            type: last
+                          type: query
+                    datasource:
+                        type: __expr__
+                        uid: __expr__
+                    expression: B
+                    intervalMs: 1000
+                    maxDataPoints: 43200
+                    refId: C
+                    type: threshold
+              noDataState: NoData
+              execErrState: Error
+              for: 0s
+              annotations: {}
+              labels: {}
+              isPaused: false
+

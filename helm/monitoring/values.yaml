@@ -1,0 +1,11 @@
+grafana:
+  adminPassword: "12345"
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
+    alerts:
+      label: grafana_alert
+      enabled: true
+      searchNamespace: ALL
+      labelValue: "1"

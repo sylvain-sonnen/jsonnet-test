@@ -1,0 +1,65 @@
+configs:
+  secret:
+    # 12345 That's amazing. I've got the same combination on my luggage
+    argocdServerAdminPassword: "$2a$10$fL5THvQZ0wqbWAeKN3W/UOC6c.iT.6R70liswS/sFFWAfNrH83VNa"
+  params:
+    server:
+      insecure: true
+      disable:
+        auth: true
+repoServer:
+  clusterAdminAccess:
+    enabled: true
+  extraContainers:
+    - command:
+        - "sh"
+        - "-c"
+        - >-
+          curl -Lo /home/argocd/cmp-server/plugins/jb
+          https://github.com/jsonnet-bundler/jsonnet-bundler/releases/download/v0.5.1/jb-linux-amd64 &&
+          curl -Lo /home/argocd/cmp-server/plugins/tk
+          https://github.com/grafana/tanka/releases/download/v0.20.0/tk-linux-amd64 &&
+          chmod +x /home/argocd/cmp-server/plugins/jb &&
+          chmod +x /home/argocd/cmp-server/plugins/tk &&
+          /var/run/argocd/argocd-cmp-server
+      image: "curlimages/curl"
+      name: "cmp"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+      volumeMounts:
+        - mountPath: "/var/run/argocd"
+          name: "var-files"
+        - mountPath: "/home/argocd/cmp-server/plugins"
+          name: "plugins"
+        - mountPath: "/home/argocd/cmp-server/config/plugin.yaml"
+          name: "cmp-plugin"
+          subPath: "plugin.yaml"
+  volumes:
+    - configMap:
+        name: "cmp-plugin"
+      name: "cmp-plugin"
+    - emptyDir: {}
+      name: "cmp-tmp"
+# repoServer:
+#   containers:
+#   - name: tanka-cmp
+#     command: [/var/run/argocd/argocd-cmp-server]
+#     image: grafana/tanka:latest
+#     securityContext:
+#       runAsNonRoot: true
+#       runAsUser: 999
+#     volumeMounts:
+#     - mountPath: /var/run/argocd
+#       name: var-files
+#     - mountPath: /home/argocd/cmp-server/plugins
+#       name: plugins
+#     - mountPath: /home/argocd/cmp-server/config/plugin.yaml
+#       subPath: smth.yaml
+#       name: tanka-cmp
+#     - mountPath: /tmp
+#       name: tmp
+#   volumes:
+#   - name: tanka-cmp
+#     configMap:
+#       name: argocd-tanka-cmp
